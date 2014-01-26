@@ -89,13 +89,14 @@
     
     myTinCan.recordStores[0] = newLRS;
     
+    
     asyncTest("Tin Can Statements sent to LRS", 1, function() {
         myTinCanQueue.sendStatementQueue(myTinCan, function() {
             ok(true, "Tin Can Statement pending Queue is 0");
             start();
         });
     });
-
+    
     
     
 }());

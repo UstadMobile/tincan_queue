@@ -43,10 +43,14 @@ TinCanQueue = function() {
     this.TINCAN_LOCALSTORAGE_INDEXVAR = "tincanindex";
     this.TINCAN_LOCALSTORAGE_PENDINGSTMTSVAR = "tincan_pendingstmts";
     this.TINCAN_LOCALSTORAGE_STATEMENTPREFIX = "tincan_statements.";       
-}
+    
+    //statements that are right now being sent to the LRS and we are waiting 
+    //for callbacks
+    this.statementsBeingTransmitted = [];
+};
 
 function getTinCanQueueInstance() {
-    if(tinCanQueueInstance == null) {
+    if(tinCanQueueInstance === null) {
         tinCanQueueInstance = new TinCanQueue();
     }
         
@@ -54,7 +58,6 @@ function getTinCanQueueInstance() {
 }
 
 TinCanQueue.prototype = {
-    
     
     
     queueDoneCallback : null,
@@ -68,22 +71,32 @@ TinCanQueue.prototype = {
      * 
      */
     statementSentCallback: function(results, tinCanStmt) {
-        var x = 0;
+        var tinCanQueue = getTinCanQueueInstance();
         
+        var thisStmtSentOK = false;
         for(var j = 0; j < results.length; j++) {
             //see if it was sent OK
             var err = results[j]['err'];
             var xhr = results[j]['xhr'];
-            if((err == null|| err == 0) && xhr.status >= 200  && xhr.status < 300) {
+            if((err === null|| err === 0) && xhr.status >= 200  && xhr.status < 300) {
                 //this one sent OK
-                var meIsOK = true;
+                thisStmtSentOK = true;
             }
         }
         
-        var tinCanQueue = getTinCanQueueInstance();
+        //If this has sent OK ... remove it from the queue
+        if(thisStmtSentOK) {
+            var stmtQueueId = tinCanQueue.statementsBeingTransmitted[tinCanStmt.id];
+            var pendingStatementsArr = tinCanQueue.getPendingStatementsArr();
+            var stmtQueueIndex = pendingStatementsArr.indexOf(stmtQueueId);
+
+            pendingStatementsArr.splice(stmtQueueIndex, 1);
+            tinCanQueue.setPendingStatementsArr(pendingStatementsArr);
+        }
+        
         tinCanQueue.queueLengthPending -= 1;
         
-        if(tinCanQueue.queueLengthPending == 0) {
+        if(tinCanQueue.queueLengthPending === 0) {
             //all statements have returned now
             if(typeof tinCanQueue.queueDoneCallback === "function") {
                 tinCanQueue.queueDoneCallback();
@@ -106,7 +119,10 @@ TinCanQueue.prototype = {
         
         var numSent = 0;
         for(var i = 0; i < tinCanPendingStmts.length; i++) {
-            stmt = this.getPendingStatementById(tinCanPendingStmts[i]);
+            var stmt = this.getPendingStatementById(tinCanPendingStmts[i]);
+             
+            //map this to the statementQueue 
+            this.statementsBeingTransmitted[stmt.id] = tinCanPendingStmts[i];
             tinCanObj.sendStatement(stmt,  this.statementSentCallback);
         }
         
@@ -143,16 +159,27 @@ TinCanQueue.prototype = {
         if(pendingStmts) {
             pendingStmtsArr = JSON.parse(pendingStmts);
         }else {
-            pendingStmtsArr = new Array();
+            pendingStmtsArr = [];
         }
         return pendingStmtsArr;
+    },
+    
+    /**
+     Sets the list of statements that are in the queue and need sent to the LRS
+    
+     @method setPendingStatementsArr
+     @param {Array} arr Array of ids
+     */        
+    setPendingStatementsArr: function(arr) {
+        localStorage.setItem(this.TINCAN_LOCALSTORAGE_PENDINGSTMTSVAR,
+            JSON.stringify(arr));
     },
     
     /**
     Puts a Statement object in the queue
      
     @method exeTinCanQueueStatement
-    @return {Number} Index number of statement in Queue, -1 if something is wrong
+    @return {Number} Index number of statement in Queue -1 if something is wrong
     */
     queueStatement: function(stmt) {
         //find the next sequence number
