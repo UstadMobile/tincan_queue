@@ -1,6 +1,8 @@
 Tin Can Queue 
 ============
 
+[![Build Status](https://travis-ci.org/mikedawson/tincan_queue.png?branch=master)](https://travis-ci.org/mikedawson/tincan_queue)
+
 Copyright Michael Dawson (mike@mike-dawson.net) 2014.  Licensed under the
 Apache 2.0 License - see LICENSE file for details.
 
@@ -36,5 +38,5 @@ $ sudo apt-get install libfontconfig1 fontconfig libfontconfig1-dev libfreetype6
 $ sudo npm install
 $ grunt
 
-[![Build Status](https://travis-ci.org/mikedawson/tincan_queue.png?branch=master)](https://travis-ci.org/mikedawson/tincan_queue)
+
 
