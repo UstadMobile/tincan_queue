@@ -101,7 +101,7 @@ TinCanQueue.prototype = {
     Puts a Statement object in the queue
      
     @method exeTinCanQueueStatement
-    @return {Number} Index number of statement in Queue
+    @return {Number} Index number of statement in Queue, -1 if something is wrong
     */
     queueStatement: function(stmt) {
         //find the next sequence number

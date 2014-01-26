@@ -63,7 +63,7 @@
     test(
         "Store statement provides valid ID",
         function () {
-            ok(storedId > 0, "Valid id > 0 returned: " + storedId);
+            ok(storedId >= 0, "Valid id >= 0 returned: " + storedId);
         }
     );
     
