@@ -4,6 +4,6 @@ node_js:
 
 before_install:
   - npm install -g grunt-cli
-  - apt-get install libfontconfig1 fontconfig libfontconfig1-dev libfreetype6-dev
+  - sudo apt-get install libfontconfig1 fontconfig libfontconfig1-dev libfreetype6-dev
 
 
