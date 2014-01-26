@@ -27,6 +27,8 @@ Provides the base TinCanQueue
 **/
 var TinCanQueue;
 
+var tinCanQueueInstance = null;
+
 
 /**
  Queues up tincan statements using HTML5 localStorage
@@ -43,23 +45,72 @@ TinCanQueue = function() {
     this.TINCAN_LOCALSTORAGE_STATEMENTPREFIX = "tincan_statements.";       
 }
 
+function getTinCanQueueInstance() {
+    if(tinCanQueueInstance == null) {
+        tinCanQueueInstance = new TinCanQueue();
+    }
+        
+    return tinCanQueueInstance;
+}
+
 TinCanQueue.prototype = {
+    
+    
+    
+    queueDoneCallback : null,
+    
+    queueLengthPending : 0,
+    
+    /**
+     * 
+     * @param {Array} results Array of results
+     * @param {Object|TinCan.Statement} tinCanStmt
+     * 
+     */
+    statementSentCallback: function(results, tinCanStmt) {
+        var x = 0;
+        
+        for(var j = 0; j < results.length; j++) {
+            //see if it was sent OK
+            var err = results[j]['err'];
+            var xhr = results[j]['xhr'];
+            if((err == null|| err == 0) && xhr.status >= 200  && xhr.status < 300) {
+                //this one sent OK
+                var meIsOK = true;
+            }
+        }
+        
+        var tinCanQueue = getTinCanQueueInstance();
+        tinCanQueue.queueLengthPending -= 1;
+        
+        if(tinCanQueue.queueLengthPending == 0) {
+            //all statements have returned now
+            if(typeof tinCanQueue.queueDoneCallback === "function") {
+                tinCanQueue.queueDoneCallback();
+            }
+        }
+    },
+    
     /**
     
     Try to send tin can statements to LRS now
     
     @method sendStatementQueue
+    @param {function} queueDoneCallBackArg - callback to run once the queue is done
     @param {TinCan} tinCanObj TinCan object that is to be used to send statements 
     */
-    sendStatementQueue: function(tinCanObj) {
+    sendStatementQueue: function(tinCanObj, queueDoneCallbackArg) {
         var tinCanPendingStmts = this.getPendingStatementsArr();
+        this.queueDoneCallback = queueDoneCallbackArg;
+        this.queueLengthPending = tinCanPendingStmts.length;
+        
+        var numSent = 0;
         for(var i = 0; i < tinCanPendingStmts.length; i++) {
             stmt = this.getPendingStatementById(tinCanPendingStmts[i]);
-            tinCanObj.sendStatement(stmt,  function(arg1, arg2) {
-                //something to check status here
-                //alert("Tin Can statement sent from queue")
-            });
+            tinCanObj.sendStatement(stmt,  this.statementSentCallback);
         }
+        
+        return numSent;
     },
     
     /**

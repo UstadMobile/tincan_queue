@@ -5,7 +5,8 @@ module.exports = function(grunt) {
         qunit: {
             all: {
                 options: {
-                    urls: ['tests/tincan_queue_tests.html']
+                    urls: ['tests/tincan_queue_tests.html'],
+                    timeout: 120000
                 }
             } 
         }

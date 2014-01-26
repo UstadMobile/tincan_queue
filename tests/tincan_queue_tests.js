@@ -22,7 +22,7 @@
     QUnit.module("Tin Can Queue");
     
     var myTinCan = new TinCan();
-    var myTinCanQueue = new TinCanQueue();
+    var myTinCanQueue = getTinCanQueueInstance();
     
     var myVerb = new TinCan.Verb({
         id : "http://activitystrea.ms/specs/json/schema/activity-schema.html#read",
@@ -76,5 +76,26 @@
                 "Returns valid Statement object");
         }
     );
+        
+    //now try sending the statement
+    
+    var newLRS = new TinCan.LRS({
+        "endpoint" : tinCanQueueTestSettings['endpoint'],
+        "version" : "1.0.0",
+        "user" : tinCanQueueTestSettings['user'],
+        'auth' : "Basic " + Base64.encode(tinCanQueueTestSettings['user']
+            + ":" + tinCanQueueTestSettings['password'])
+    }); 
+    
+    myTinCan.recordStores[0] = newLRS;
+    
+    asyncTest("Tin Can Statements sent to LRS", 1, function() {
+        myTinCanQueue.sendStatementQueue(myTinCan, function() {
+            ok(true, "Tin Can Statement pending Queue is 0");
+            start();
+        });
+    });
+
+    
     
 }());
