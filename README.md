@@ -36,5 +36,5 @@ $ sudo apt-get install libfontconfig1 fontconfig libfontconfig1-dev libfreetype6
 $ sudo npm install
 $ grunt
 
-
+[![Build Status](https://travis-ci.org/mikedawson/tincan_queue.png?branch=master)](https://travis-ci.org/mikedawson/tincan_queue)
 
