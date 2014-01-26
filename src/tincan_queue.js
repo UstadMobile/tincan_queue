@@ -54,15 +54,29 @@ TinCanQueue.prototype = {
     sendStatementQueue: function(tinCanObj) {
         var tinCanPendingStmts = this.getPendingStatementsArr();
         for(var i = 0; i < tinCanPendingStmts.length; i++) {
-            var stmtStr = localStorage.getItem(
-                this.TINCAN_LOCALSTORAGE_STATEMENTPREFIX + tinCanPendingStmts[i]);
-            var stmt = TinCan.Statement.fromJSON(stmtStr);
+            stmt = this.getPendingStatementById(tinCanPendingStmts[i]);
             tinCanObj.sendStatement(stmt,  function(arg1, arg2) {
                 //something to check status here
                 //alert("Tin Can statement sent from queue")
             });
         }
     },
+    
+    /**
+     * Returns the Statement object for the given id
+     * 
+     * @method getPendingStatementById
+     * @param {Number} id number of pending statement
+     * 
+     * @return {TinCan.Statement}
+     */
+    getPendingStatementById: function(id) {
+        var stmtStr = localStorage.getItem(
+            this.TINCAN_LOCALSTORAGE_STATEMENTPREFIX + id);
+        var stmt = TinCan.Statement.fromJSON(stmtStr);
+        return stmt;
+    },
+     
     
     /**
     Returns an array with the index numbers of pending statements that

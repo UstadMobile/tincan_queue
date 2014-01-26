@@ -27,3 +27,14 @@ Give the sendStatementQueue your tin can object and the queue will get sent
 
 myQueue.sendStatementQueue(tinCanObject);
 
+Running the tests:
+
+Use the grunt file.  Depends on PhantomJS : important - install the following
+packages on Ubuntu for this to cooperate:
+
+$ sudo apt-get install libfontconfig1 fontconfig libfontconfig1-dev libfreetype6-dev
+$ sudo npm install
+$ grunt
+
+
+
